@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Films et Acteurs</title>
+
+
+
+
+
+  <style>
+    :root {
+      --background-dark: #000;
+      --background-light: #fff;
+      --text-dark: #fff;
+      --text-light: #000;
+      --primary-color: #cd1f1f;
+      --container-dark: #1e1e1e;
+      --container-light: #e6e6e6;
+      --element-dark: #323232;
+      --element-light: #d0d0d0;
+      --correct-color: #008800;
+      --wrong-color: #cc0000;
+      --timer-color: #fff;
+      --timer-warning: #ff9900;
+      --timer-danger: #ff0000;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-dark);
+      text-align: center;
+      padding: 20px;
+      transition: background-color 0.5s, color 0.5s;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      animation: titlePulse 2s infinite;
+    }
+    
+    @keyframes titlePulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .score {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 1.5em;
+      transition: transform 0.3s;
+    }
+    
+    .score.update {
+      animation: scoreUpdate 0.5s;
+    }
+    
+    @keyframes scoreUpdate {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    
+    .timer {
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      font-size: 1.5em;
+      color: var(--timer-color);
+      transition: color 0.3s;
+    }
+    
+    .timer.warning {
+      color: var(--timer-warning);
+    }
+    
+    .timer.danger {
+      color: var(--timer-danger);
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .movie {
+      margin: 20px auto;
+      padding: 20px;
+      background-color: var(--container-dark);
+      border-radius: 5px;
+      width: 80%;
+      transition: background-color 0.3s;
+      animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .actors-list {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    .actor {
+      padding: 10px;
+      margin: 5px;
+      background-color: var(--element-dark);
+      border-radius: 5px;
+      width: 18%;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, background-color 0.3s;
+      animation: actorAppear 0.5s;
+    }
+    
+    @keyframes actorAppear {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .actor:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .actor.correct {
+      background-color: var(--correct-color);
+      transform: scale(1.1);
+      animation: correctAnswer 0.6s;
+    }
+    
+    @keyframes correctAnswer {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(0, 255, 0, 0.5); }
+      100% { transform: scale(1.1); }
+    }
+
+    .actor.wrong {
+      background-color: var(--wrong-color);
+      transform: scale(0.9);
+      pointer-events: none;
+      animation: wrongAnswer 0.6s;
+    }
+    
+    @keyframes wrongAnswer {
+      0% { transform: scale(1); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: scale(0.9); }
+    }
+
+    .theme-toggle, 
+    .button {
+      padding: 10px 15px;
+      background-color: var(--element-dark);
+      color: var(--text-dark);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      font-size: 1em;
+    }
+
+    .theme-toggle:hover,
+    .button:hover {
+      background-color: #505050;
+      transform: translateY(-2px);
+    }
+    
+    .theme-toggle:active,
+    .button:active {
+      transform: translateY(1px);
+    }
+
+    .stats-table {
+      margin: 20px auto;
+      color: var(--text-dark);
+      background-color: var(--container-dark);
+      border-collapse: collapse;
+      width: 80%;
+      transition: background-color 0.3s;
+      animation: fadeIn 0.8s;
+    }
+
+    .stats-table th, 
+    .stats-table td {
+      padding: 8px;
+      border: 1px solid #555;
+    }
+    
+    .stats-table td.updated {
+      animation: cellUpdate 0.5s;
+    }
+    
+    @keyframes cellUpdate {
+      0% { background-color: transparent; }
+      50% { background-color: var(--primary-color); }
+      100% { background-color: transparent; }
+    }
+
+    #found-movies-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #found-movies-list li {
+      margin: 5px;
+      padding: 8px;
+      background-color: var(--element-dark);
+      border-radius: 5px;
+      display: inline-block;
+      transition: background-color 0.3s;
+      animation: itemAdd 0.5s;
+    }
+    
+    @keyframes itemAdd {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 768px) {
+      .actors-list {
+        flex-direction: column;
+        align-items: center;
+      }
+      .actor {
+        width: 80%;
+        margin: 5px 0;
+      }
+    }
+
+    body.light-theme {
+      background-color: var(--background-light);
+      color: var(--text-light);
+    }
+
+    body.light-theme .movie,
+    body.light-theme .stats-table {
+      background-color: var(--container-light);
+    }
+
+    body.light-theme .actor:not(.correct):not(.wrong),
+    body.light-theme #found-movies-list li,
+    body.light-theme .theme-toggle,
+    body.light-theme .button {
+      background-color: var(--element-light);
+      color: var(--text-light);
+    }
+    
+    .theme-transition {
+      animation: themeSwitch 0.5s;
+    }
+    
+    @keyframes themeSwitch {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+    
+    .game-over {
+      animation: gameOverEffect 1s;
+    }
+    
+    @keyframes gameOverEffect {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .time-bonus {
+      position: fixed;
+      color: green;
+      font-weight: bold;
+      animation: timeBonus 2s forwards;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    @keyframes timeBonus {
+      0% { opacity: 0; transform: translate(-50%, 0); }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -50px); }
+    }
+  </style>
+
+
+
+
+
+
+
+</head>
+<body>
+  <div class="score" id="score">Score : 0</div>
+  <div class="timer" id="timer">Temps : 120s</div>
+  <button class="theme-toggle" id="theme-toggle">Changer le thème</button>
+  <h1>Films et Acteurs</h1>
+  <div id="movie-container" class="movie">
+    <h2 id="movie-title">Chargement du film...</h2>
+    <div class="actors-list" id="actors-list"></div>
+  </div>
+
+  <div id="stats-container">
+    <h2>Statistiques</h2>
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>Nombre total de films</th>
+          <th>Nombre de films traités</th>
+          <th>Nombre de bonnes réponses</th>
+          <th>Nombre de mauvaises réponses</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="stats-row">
+          <td id="total-movies">0</td>
+          <td id="movies-found">0</td>
+          <td id="correct-answers">0</td>
+          <td id="wrong-answers">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button id="restart-button" class="button" style="margin-top: 20px;">
+    Recommencer
+  </button>
+ 
+  <div style="margin-top: 20px;">
+    <button id="home-button" class="button">
+      Retour à l'accueil
+    </button>
+  </div>
+
+  <div id="found-movies-container" style="margin-top: 20px;">
+    <h2>Films trouvés</h2>
+    <ul id="found-movies-list"></ul>
+  </div>
+
+
+
+
+
+
+  
+  <script>
+       
+  // Définition du jeu de base
+    const gameState = {
+      currentMovieIndex: 0,
+      movies: [],
+      movieTitles: {},
+      correctActorId: null,
+      correctActorName: null,
+      score: 0,
+      isDarkTheme: true,
+      totalMovies: 0,
+      moviesFound: 0,
+      correctAnswers: 0,
+      wrongAnswers: 0,
+      foundMovies: [],
+      timeRemaining: 120, 
+      timerInterval: null,
+      isGameOver: false
+    };
+
+
+
+    
+    const fakeActors = [
+      "Brad Pitt", "Angelina Jolie", "Tom Cruise", "Scarlett Johansson", 
+      "Leonardo DiCaprio", "Meryl Streep", "Johnny Depp", "Emma Watson",
+      "Robert Downey Jr.", "Jennifer Lawrence", "Denzel Washington", 
+      "Nicole Kidman", "Will Smith", "Charlize Theron"
+    ];
+    
+
+
+
+//HTML
+    const elements = {
+      movieContainer: document.getElementById('movie-container'),
+      movieTitle: document.getElementById('movie-title'),
+      actorsList: document.getElementById('actors-list'),
+      scoreElement: document.getElementById('score'),
+      timerElement: document.getElementById('timer'),
+      totalMovies: document.getElementById('total-movies'),
+      moviesFound: document.getElementById('movies-found'),
+      correctAnswers: document.getElementById('correct-answers'),
+      wrongAnswers: document.getElementById('wrong-answers'),
+      foundMoviesList: document.getElementById('found-movies-list'),
+      themeToggle: document.getElementById('theme-toggle'),
+      restartButton: document.getElementById('restart-button'),
+      homeButton: document.getElementById('home-button')
+    };
+
+
+
+    
+    // bouton 
+    elements.themeToggle.addEventListener('click', toggleTheme);
+    elements.restartButton.addEventListener('click', () => location.reload());
+    elements.homeButton.addEventListener('click', () => window.location.href = '/');
+    
+    
+    
+        // ini du jeu
+    async function initGame() {
+      try {
+        await fetchMovies();
+        startTimer();
+      } catch (error) {
+        handleError("Erreur d'initialisation du jeu : " + error.message);
+      }
+    }
+
+
+
+
+
+
+      // minuteur
+    function startTimer() {
+      if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+      }
+      
+      gameState.timerInterval = setInterval(() => {
+        if (gameState.timeRemaining > 0 && !gameState.isGameOver) {
+          gameState.timeRemaining--;
+          updateTimerDisplay();
+        } else if (!gameState.isGameOver) {
+          clearInterval(gameState.timerInterval);
+          gameState.isGameOver = true;
+          finishGame('time');
+        }
+      }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+      elements.timerElement.textContent = `Temps : ${gameState.timeRemaining}s`;
+      
+      elements.timerElement.classList.remove('warning', 'danger');
+      
+      if (gameState.timeRemaining <= 10) {
+        elements.timerElement.classList.add('danger');
+      } else if (gameState.timeRemaining <= 30) {
+        elements.timerElement.classList.add('warning');
+      }
+    }
+    
+    function addTime(seconds) {
+      gameState.timeRemaining += seconds;
+      updateTimerDisplay();
+      
+      const timeBonus = document.createElement('div');
+      timeBonus.className = 'time-bonus';
+      timeBonus.textContent = `+${seconds}s`;
+      
+      const timerRect = elements.timerElement.getBoundingClientRect();
+      timeBonus.style.left = `${timerRect.left + timerRect.width / 2}px`;
+      timeBonus.style.top = `${timerRect.top}px`;
+      
+      document.body.appendChild(timeBonus);
+      
+      setTimeout(() => {
+        document.body.removeChild(timeBonus);
+      }, 2000);
+    }
+
+
+
+
+
+
+    // récup des films et des titres
+    async function fetchMovies() {
+      try {
+        const response = await fetch(`/movies-actors/movies?limit=100`);
+        const data = await response.json();
+        
+        if (data.data && data.data.length > 0) {
+          gameState.movies = data.data;
+          gameState.totalMovies = gameState.movies.length;
+          updateStats();
+          await loadMovieTitles(gameState.movies);
+          displayMovie(gameState.currentMovieIndex);
+        } else {
+          elements.movieContainer.innerHTML = "<p>Aucun film trouvé.</p>";
+        }
+      } catch (error) {
+        handleError("Erreur lors de la récupération des films", error);
+      }
+    }
+
+    async function loadMovieTitles(movieIds) {
+      try {
+        const promises = movieIds.map(id => 
+          fetch(`/movies-actors/movie-title/${id}`)
+            .then(res => res.json())
+            .then(data => {
+              gameState.movieTitles[id] = data.title || `Film ID: ${id}`;
+            })
+            .catch(() => {
+              gameState.movieTitles[id] = `Film ID: ${id}`;
+            })
+        );
+        
+        await Promise.allSettled(promises);
+      } catch (error) {
+        handleError("Erreur lors du chargement des titres de films", error);
+      }
+    }
+
+
+
+
+
+
+       // gestion des acteurs 
+    async function fetchActors(movieId) {
+      try {
+        const response = await fetch(`/movies-actors/actors/${movieId}`);
+        const data = await response.json();
+        elements.actorsList.innerHTML = "";
+
+        if (data.data && data.data.length > 0) {
+          gameState.correctActorId = data.data[0];
+          
+          try {
+            const actorResponse = await fetch(`/movies-actors/actor-name/${gameState.correctActorId}`);
+            const actorData = await actorResponse.json();
+            gameState.correctActorName = actorData.name || gameState.correctActorId;
+          } catch (error) {
+            gameState.correctActorName = gameState.correctActorId;
+          }
+          
+          displayActors();
+        } else {
+          handleNoActors();
+        }
+      } catch (error) {
+        handleError("Erreur lors de la récupération des acteurs", error);
+        handleNoActors();
+      }
+    }
+    
+    function displayActors() {
+      const actors = [gameState.correctActorName];
+      
+      while (actors.length < 5) {
+        const fakeActorName = fakeActors[Math.floor(Math.random() * fakeActors.length)];
+        if (!actors.includes(fakeActorName)) {
+          actors.push(fakeActorName);
+        }
+      }
+
+      shuffleArray(actors);
+
+      actors.forEach((actorName, index) => {
+        setTimeout(() => {
+          const actorDiv = document.createElement('div');
+          actorDiv.className = "actor";
+          actorDiv.textContent = actorName;
+          actorDiv.addEventListener('click', () => handleActorClick(actorName));
+          elements.actorsList.appendChild(actorDiv);
+        }, index * 100); 
+      });
+    }
+    
+    function handleActorClick(actorName) {
+      if (gameState.isGameOver) return;
+      
+      const actors = document.querySelectorAll('.actor');
+      const isCorrect = actorName === gameState.correctActorName;
+
+      actors.forEach(actor => {
+        if (actor.textContent === gameState.correctActorName && isCorrect) {
+          actor.classList.add('correct');
+        } else if (actor.textContent === actorName) {
+          actor.classList.add('wrong');
+        }
+      });
+
+      if (isCorrect) {
+        gameState.score += 3;
+        gameState.correctAnswers++;
+        
+        addTime(20);
+        
+        const currentMovieId = gameState.movies[gameState.currentMovieIndex];
+        const movieTitle = gameState.movieTitles[currentMovieId] || `Film ID: ${currentMovieId}`;
+        if (!gameState.foundMovies.includes(movieTitle)) {
+          gameState.foundMovies.push(movieTitle);
+          updateFoundMoviesList();
+        }
+        
+        actors.forEach(actor => {
+          actor.onclick = null; 
+        });
+        
+        setTimeout(() => {
+          elements.movieContainer.style.animation = 'none';
+          void elements.movieContainer.offsetWidth; 
+          elements.movieContainer.style.animation = 'fadeIn 0.5s';
+          
+          if (gameState.currentMovieIndex < gameState.movies.length - 1) {
+            displayMovie(++gameState.currentMovieIndex);
+          } else {
+            finishGame('complete');
+          }
+        }, 1000);
+      } else {
+        gameState.score = Math.max(0, gameState.score - 1); 
+        gameState.wrongAnswers++;
+      }
+
+      updateScore();
+      updateStats();
+    }
+    
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function handleNoActors() {
+      elements.actorsList.innerHTML = "<p>Aucun acteur trouvé pour ce film.</p>";
+      setTimeout(() => {
+        elements.movieContainer.style.animation = 'none';
+        void elements.movieContainer.offsetWidth; 
+        elements.movieContainer.style.animation = 'fadeIn 0.5s';
+        
+        if (gameState.currentMovieIndex < gameState.movies.length - 1) {
+          displayMovie(++gameState.currentMovieIndex);
+        } else {
+          finishGame('complete');
+        }
+      }, 1000);
+    }
+
+
+
+
+
+      // statistiques et affichage 
+    function updateScore() {
+      elements.scoreElement.textContent = `Score : ${gameState.score}`;
+      elements.scoreElement.classList.add('update');
+      
+      setTimeout(() => {
+        elements.scoreElement.classList.remove('update');
+      }, 500);
+    }
+
+    function updateStats() {
+      const oldValues = {
+        moviesFound: elements.moviesFound.textContent,
+        correctAnswers: elements.correctAnswers.textContent,
+        wrongAnswers: elements.wrongAnswers.textContent
+      };
+      
+      elements.totalMovies.textContent = gameState.totalMovies;
+      elements.moviesFound.textContent = gameState.moviesFound;
+      elements.correctAnswers.textContent = gameState.correctAnswers;
+      elements.wrongAnswers.textContent = gameState.wrongAnswers;
+      
+      if (oldValues.moviesFound !== elements.moviesFound.textContent) {
+        animateCell(elements.moviesFound);
+      }
+      if (oldValues.correctAnswers !== elements.correctAnswers.textContent) {
+        animateCell(elements.correctAnswers);
+      }
+      if (oldValues.wrongAnswers !== elements.wrongAnswers.textContent) {
+        animateCell(elements.wrongAnswers);
+      }
+    }
+    
+
+
+
+    // affi des films 
+    function animateCell(cell) {
+      cell.classList.add('updated');
+      setTimeout(() => {
+        cell.classList.remove('updated');
+      }, 500);
+    }
+
+    function updateFoundMoviesList() {
+      const li = document.createElement('li');
+      li.textContent = gameState.foundMovies[gameState.foundMovies.length - 1];
+      elements.foundMoviesList.appendChild(li);
+    }
+
+    function displayMovie(index) {
+      if (index < 0 || index >= gameState.movies.length) {
+        finishGame('complete');
+        return;
+      }
+      
+      const movieId = gameState.movies[index];
+      const movieTitle = gameState.movieTitles[movieId] || `Film ID: ${movieId}`;
+      
+      elements.movieTitle.style.animation = 'none';
+      void elements.movieTitle.offsetWidth; 
+      elements.movieTitle.style.animation = 'fadeIn 0.5s';
+      elements.movieTitle.textContent = movieTitle;
+      
+      fetchActors(movieId);
+      gameState.moviesFound++;
+      updateStats();
+    }
+
+    function finishGame(reason) {
+      if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+      }
+      
+      gameState.isGameOver = true;
+      
+      let message = '';
+      if (reason === 'time') {
+        message = '<p>Temps écoulé !</p>';
+      } else {
+        message = '<p>Tous les films ont été traités !</p>';
+      }
+      
+      elements.movieContainer.innerHTML = `
+        <div class="game-over">
+          <h2>Fin du jeu !</h2>
+          ${message}
+          <p>Votre score final : ${gameState.score}</p>
+          <p>Vous avez trouvé ${gameState.correctAnswers} acteurs sur ${gameState.moviesFound} films traités.</p>
+          <p>Temps restant : ${gameState.timeRemaining} secondes</p>
+        </div>
+      `;
+    }
+
+
+
+
+
+     // thème   
+    function toggleTheme() {
+      document.body.classList.add('theme-transition');
+      
+      document.body.classList.toggle('light-theme');
+      gameState.isDarkTheme = !gameState.isDarkTheme;
+      
+      setTimeout(() => {
+        document.body.classList.remove('theme-transition');
+      }, 500);
+    }
+    
+
+
+
+  // Erreur
+    function handleError(message, error) {
+      console.error(message, error);
+      elements.movieContainer.innerHTML = `<p>${message}</p>`;
+    }
+
+    window.addEventListener('load', initGame);
+  </script>
+</body>
+</html>

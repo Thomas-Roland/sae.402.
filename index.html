@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>UniversCinéma</title>
+ <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #000;
+      color: #fff;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    
+    header {
+      padding: 20px;
+      background-color: rgb(205, 31, 31);
+      color: #fff;
+      text-align: center;
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
+      animation: slideInDown 1s ease-out;
+    }
+    
+    h1 {
+      animation: pulse 2s infinite;
+    }
+    
+    h3 {
+      animation: fadeIn 2s ease-in;
+    }
+    
+    button {
+      background-color: rgb(205, 31, 31);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      animation: bounce 1s ease infinite;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button:hover {
+      background-color: rgb(255, 50, 50);
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(255, 50, 50, 0.7);
+    }
+    
+    button:before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(45deg);
+      animation: shine 3s linear infinite;
+    }
+    
+    footer {
+      padding: 20px;
+      background-color: rgb(205, 31, 31);
+      color: #fff;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      align-items: center;
+      animation: slideInUp 1s ease-out;
+    }
+    
+    footer div {
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    
+    footer div:hover {
+      transform: translateY(-5px);
+    }
+    
+    a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 10px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    a:hover {
+      color: #ffcc00;
+    }
+    
+    a:after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -3px;
+      left: 0;
+      background-color: #ffcc00;
+      transition: width 0.3s ease;
+    }
+    
+    a:hover:after {
+      width: 100%;
+    }
+    
+    /* Keyframes for animations */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideInDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes slideInUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes shine {
+      0% { left: -100%; }
+      20% { left: 100%; }
+      100% { left: 100%; }
+    }
+    
+    .cinema-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      animation: twinkle ease infinite;
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0; }
+      50% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    
+    .content {
+      margin: 50px auto;
+      max-width: 800px;
+      animation: fadeIn 2s ease;
+      padding-bottom: 100px;
+    }
+ </style>
+</head>
+<body>
+  <div class="cinema-background" id="starField"></div>
+  
+  <header>
+    <h1>Bienvenue sur UniversCinéma</h1>
+  </header>
+  
+  <div class="content">
+    <h3>Meilleur jeu pour les fans de cinématographie, trouvez les acteurs qui ont participé <br>
+     à ces films. A chaque bonne réponse, vous obtenez trois points en plus, et au contraire à <br>
+     chaques mauvaise réponse vous perdez un point.</h3>
+    
+    <p>Cliquez sur le bouton ci-dessous.</p>
+    <button onclick="location.href='/jeu'">Accéder au jeu</button>
+  </div>
+  
+  <footer>
+    <div>
+      <p>&copy; 2023 UniversCinéma. Tous droits réservés.</p>
+    </div>
+    <div>
+      <p>
+        <a href="#" target="_blank">Contact</a>
+        <a href="#" target="_blank">À propos</a>
+        <a href="#" target="_blank">Politique de confidentialité</a>
+      </p>
+    </div>
+    <div>
+      <p>Suivez-nous sur :</p>
+      <p>
+        <a href="#" target="_blank">Facebook</a>
+        <a href="#" target="_blank">Twitter</a>
+        <a href="#" target="_blank">Instagram</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const starField = document.getElementById('starField');
+      const numStars = 100;
+      
+      for (let i = 0; i < numStars; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        const size = Math.random() * 4 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        
+        const duration = Math.random() * 3 + 2;
+        const delay = Math.random() * 5;
+        star.style.animationDuration = `${duration}s`;
+        star.style.animationDelay = `${delay}s`;
+        
+        starField.appendChild(star);
+      }
+      
+      const title = document.querySelector('h1');
+      let count = 0;
+      
+      setInterval(() => {
+        if (count % 20 === 0) {
+          title.style.opacity = '0.7';
+          setTimeout(() => {
+            title.style.opacity = '1';
+          }, 100);
+        }
+        count++;
+      }, 100);
+    });
+  </script>
+</body>
+</html>
